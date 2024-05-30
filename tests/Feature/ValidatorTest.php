@@ -74,4 +74,29 @@ class ValidatorTest extends TestCase
             Log::error($message->toJson(JSON_PRETTY_PRINT));
         }
     }
+
+    public function testValidatorMultipleRules()
+    {
+        $data = [
+            "username" => "tian",
+            "password" => "tian"
+        ];
+
+        $rules = [
+            "username" => "required|email|max:100",
+            "password" => ["required", "min:6", "max:20"],
+        ];
+
+        $validator = Validator::make($data, $rules);
+        self::assertNotNull($validator);
+        
+        try {
+            $validator->validate();
+            self::fail("ValidationException not thrown");
+        } catch(ValidationException $exception) {
+            self::assertNotNull($exception);
+            $message = $exception->validator->errors();
+            Log::error($message->toJson(JSON_PRETTY_PRINT));
+        }
+    }
 }
