@@ -22,14 +22,14 @@
             @error('username')
                 {{ $message }}
             @enderror
-            <input type="text" name="usename">
+            <input type="text" name="usename" value="{{ old('username') }}">
         </label> <br>
         <label for="password">
             Password 
             @error('password')
                 {{ $message }}
             @enderror
-            <input type="text" name="password">
+            <input type="text" name="password" value="{{ old('password') }}">
         </label> <br>
         <input type="submit" value="Login">
     </form>
