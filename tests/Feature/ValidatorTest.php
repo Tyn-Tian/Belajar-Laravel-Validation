@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Validator as ValidationValidator;
 use Tests\TestCase;
 
 class ValidatorTest extends TestCase
@@ -152,6 +153,39 @@ class ValidatorTest extends TestCase
         ];
 
         $validator = Validator::make($data, $rules, $message);
+        self::assertNotNull($validator);
+        
+        try {
+            $validator->validate();
+            self::fail("ValidationException not thrown");
+        } catch(ValidationException $exception) {
+            self::assertNotNull($exception);
+            $message = $exception->validator->errors();
+            Log::error($message->toJson(JSON_PRETTY_PRINT));
+        }
+    }
+
+    public function testValidatorAdditionalValidation()
+    {
+        App::setLocale("id");
+
+        $data = [
+            "username" => "tian@gmail.com",
+            "password" => "tian@gmail.com"
+        ];
+
+        $rules = [
+            "username" => "required|email|max:100",
+            "password" => ["required", "min:6", "max:20"],
+        ];
+
+        $validator = Validator::make($data, $rules);
+        $validator->after(function (ValidationValidator $validator) {
+            $data = $validator->getData();
+            if ($data['username'] == $data['password']) {
+                $validator->errors()->add('password', 'Password tidak boleh sama dengan username');
+            }
+        });
         self::assertNotNull($validator);
         
         try {
